@@ -2,4 +2,9 @@
 import os
 import tempfile
 
+os.environ.setdefault(
+    "FLASK_SECRET_KEY",
+    "clave-exclusivamente-para-pruebas-ev3"
+)
+
 os.environ.setdefault("DB_PATH", os.path.join(tempfile.mkdtemp(prefix="alumnos-test-"), "alumnos.db"))

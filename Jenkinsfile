@@ -70,11 +70,20 @@ stage('Dependency Management') {
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
 
+
 stage('Deploy Staging') {
     steps {
-        sh 'bash scripts/deploy.sh staging 5001'
+        withCredentials([
+            string(
+                credentialsId: 'ev3-flask-secret',
+                variable: 'FLASK_SECRET_KEY'
+            )
+        ]) {
+            sh 'bash scripts/deploy.sh staging 5001'
+        }
     }
 }
+
 
 stage('DAST - OWASP ZAP') {
     steps {

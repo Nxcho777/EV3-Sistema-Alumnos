@@ -7,12 +7,15 @@ Las métricas de seguridad (logins fallidos y peticiones sospechosas) se ven en 
 """
 from markupsafe import escape
 from werkzeug.security import check_password_hash
+import hmac
+import secrets
 import os
 import re
 import sqlite3
 import time
 
 from flask import Flask, Response, g, jsonify, render_template_string, request
+from flask import Flask, Response, g, jsonify, render_template_string, request, session
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 
 app = Flask(__name__)
@@ -68,6 +71,7 @@ PORTADA = """<!doctype html>
 </form>
 <h2>Acceso administrador</h2>
 <form action="/login" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
   <input name="usuario" value="admin"> <input name="clave" type="password" value="">
   <button type="submit">Entrar</button>
 </form>
@@ -155,7 +159,14 @@ def portada():
     @brief Portada HTML con enlaces y formularios del sistema.
     @return Página HTML.
     """
-    return render_template_string(PORTADA, version=VERSION)
+    token = session.get("csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["csrf_token"] = token
+
+    return render_template_string(
+        PORTADA, version=VERSION, csrf_token=token
+    )
 
 
 @app.route("/hello")
@@ -234,6 +245,17 @@ def login():
     @brief Valida las credenciales del administrador enviadas por formulario.
     @return JSON con el resultado; 401 si las credenciales no son válidas.
     """
+
+    token_sesion = session.get("csrf_token")
+    token_formulario = request.form.get("csrf_token", "")
+
+    if (
+        not token_sesion
+        or not hmac.compare_digest(token_sesion, token_formulario)
+    ):
+        return jsonify({"error": "Token CSRF inválido"}), 403
+
+
     usuario = request.form.get("usuario", "")
     clave = request.form.get("clave", "")
     

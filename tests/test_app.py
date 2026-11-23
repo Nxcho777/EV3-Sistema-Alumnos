@@ -80,3 +80,14 @@ def test_hello_previene_xss(client):
     assert "<script>" not in html
     assert "&lt;script&gt;" in html
 
+
+def test_login_rechaza_sin_csrf(client):
+    client.get("/")
+
+    respuesta = client.post(
+        "/login",
+        data={"usuario": "admin", "clave": "incorrecta"}
+    )
+
+    assert respuesta.status_code == 403
+
