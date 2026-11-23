@@ -143,6 +143,7 @@ def despues_de_la_peticion(respuesta):
         "style-src 'self'; "
         "object-src 'none'; "
         "base-uri 'self'; "
+        "form-action 'self'; "
         "frame-ancestors 'none'"
     )
     return respuesta
