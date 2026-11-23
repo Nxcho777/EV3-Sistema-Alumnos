@@ -69,8 +69,31 @@ stage('Dependency Management') {
 
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
+
+stage('Deploy Staging') {
+    steps {
+        sh 'bash scripts/deploy.sh staging 5001'
+    }
+}
+
+stage('DAST - OWASP ZAP') {
+    steps {
+        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            sh '.venv/bin/python scripts/zap_scan.py http://jenkins:5001'
+        }
+    }
+}
+
+
         
 stage('Deploy Producción') {
+
+
+when {
+    expression {
+        currentBuild.currentResult == 'SUCCESS'
+    }
+}
     steps {
         withCredentials([
             string(credentialsId: 'ev3-flask-secret',
