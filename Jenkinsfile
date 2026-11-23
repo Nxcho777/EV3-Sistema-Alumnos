@@ -59,6 +59,13 @@ stage('Security Review (SAST)') {
     }
 }
 
+stage('Dependency Management') {
+    steps {
+        sh 'mkdir -p reports'
+        sh '.venv/bin/pip-audit -r requirements.txt -f json -o reports/pip-audit.json'
+    }
+}
+
 
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
