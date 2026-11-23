@@ -5,6 +5,7 @@
 Además de las rutas de negocio, la app publica métricas para Prometheus en /metrics.
 Las métricas de seguridad (logins fallidos y peticiones sospechosas) se ven en Grafana.
 """
+from markupsafe import escape
 from werkzeug.security import check_password_hash
 import os
 import re
@@ -146,12 +147,12 @@ def portada():
 
 @app.route("/hello")
 def hello():
-    """!
-    @brief Saluda al usuario cuyo nombre llega en el parámetro de URL «name».
-    @return Página HTML con el saludo.
+    """
+    Saluda al usuario escapando caracteres HTML
+    para prevenir Cross-Site Scripting (XSS).
     """
     name = request.args.get("name", "visitante")
-    return f"<h1>Hola, {name}!</h1>"
+    return f"<h1>Hola, {escape(name)}!</h1>"
 
 
 @app.route("/health")

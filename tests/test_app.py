@@ -67,3 +67,16 @@ def test_metricas(client):
     assert r.status_code == 200
     assert b"http_requests_total" in r.data
     assert b"login_fallidos_total" in r.data
+
+
+def test_hello_previene_xss(client):
+    respuesta = client.get(
+        "/hello",
+        query_string={"name": "<script>alert(1)</script>"}
+    )
+    html = respuesta.get_data(as_text=True)
+
+    assert respuesta.status_code == 200
+    assert "<script>" not in html
+    assert "&lt;script&gt;" in html
+
