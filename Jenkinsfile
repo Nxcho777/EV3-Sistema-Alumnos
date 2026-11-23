@@ -51,6 +51,15 @@ pipeline {
 
         // >>> [SEGURIDAD]: aquí van las etapas "Security Review (SAST)" y "Dependency Management"
 
+
+stage('Security Review (SAST)') {
+    steps {
+        sh 'mkdir -p reports'
+        sh '.venv/bin/bandit -r app.py -f json -o reports/bandit.json'
+    }
+}
+
+
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
         
