@@ -53,14 +53,21 @@ pipeline {
 
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
-        stage('Deploy Producción') {
-            // >>> [GATE]: aquí va la condición "when" que protege producción
-            steps {
-                sh 'bash scripts/deploy.sh produccion 5000'
-                script { env.PRODUCCION = env.APP_VERSION }
-            }
+        
+stage('Deploy Producción') {
+    steps {
+        withCredentials([
+            string(credentialsId: 'ev3-flask-secret',
+                   variable: 'FLASK_SECRET_KEY'),
+            string(credentialsId: 'ev3-admin-password-hash',
+                   variable: 'ADMIN_PASSWORD_HASH')
+        ]) {
+            sh 'bash scripts/deploy.sh produccion 5000'
         }
+        script { env.PRODUCCION = env.APP_VERSION }
     }
+}
+
 
     post {
         always {
